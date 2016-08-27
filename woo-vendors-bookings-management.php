@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Woo Vendors Bookings Management
  * Description: Allows vendors to manage their bookings in the frontend
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Liam Bailey
  * Author URI: http://webbyscots.com/
  * License: GNU General Public License v3.0

@@ -19,6 +19,9 @@ This section describes how to install the plugin and get it working.
 
 e.g.
 
-1. Upload the plugin files to the `/wp-content/plugins/woo-vendors-dashboard` directory, or install the plugin through the WordPress plugins screen directly.
+1. Upload the plugin files to the `/wp-content/plugins/woo-vendors-bookings-dashboard` directory, or install the plugin through the WordPress plugins screen directly.
 1. Activate the plugin through the 'Plugins' screen in WordPress
 1. Now you can give your vendors the url /vendors-dashboard/{vendor-slug} to allow them to manage their bookings
+
+== Changelog ==
+v1.0.1 fixes readme
