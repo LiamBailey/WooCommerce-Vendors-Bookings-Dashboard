@@ -2,16 +2,16 @@
 /**
  * Plugin Name: Woo Vendors Bookings Management
  * Description: Allows vendors to manage their bookings in the frontend
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Liam Bailey
  * Author URI: http://webbyscots.com/
  * License: GNU General Public License v3.0
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  */
-global $WVBM;
-$WVBM = new WVBM;
+global $WVBD;
+$WVBD = new WVBD;
 
-class WVBM {
+class WVBD {
 
     private $textdomain = "woocommerce-vendors-bookings-management";
     private $required_plugins = array('woocommerce', 'woocommerce-bookings', 'woocommerce-product-vendors');
@@ -49,14 +49,14 @@ class WVBM {
         if ($vendor_id === "") {
             return;
         }
-        $vendor_term = get_term($vendor_id, 'shop_vendor');
+        $vendor_term = get_term($vendor_id, 'wcpv_product_vendors');
         $vendor_link = site_url() . "/vendors-dashboard/" . $vendor_term->slug;
         ?><h2>Vendors Dashboard</h2>
         <p>Please <a href='<?php echo $vendor_link; ?>'>click here</a> to manage your bookings</p><?php
     }
 
     function process_confirm() {
-        if ($_GET['wvbm_action'] == "confirm") {
+        if ($_GET['wvbd_action'] == "confirm") {
             if (get_post_type($_GET['booking_id']) != "wc_booking" || !wp_verify_nonce($_REQUEST['security'], 'vendor-booking-confirm-noncerator')) {
                 wc_add_notice("Invalid request - booking not confirmed", "error");
                 $url = site_url() . "/vendors-dashboard/" . get_query_var('vendors-dashboard') . "/";
@@ -100,13 +100,13 @@ class WVBM {
     }
 
     function show_dashboard() {
-        $vendor = get_term_by('slug', get_query_var('vendors-dashboard'), 'shop_vendor');
+        $vendor = get_term_by('slug', get_query_var('vendors-dashboard'), 'wcpv_product_vendors');
         if (!$vendor) {
             echo "<p class='error'>Vendor not found!</p>";
             return;
         }
         $user = get_current_user_id();
-        if (!current_user_can('administrator') && !is_vendor_admin($vendor->term_id, $user)) {
+        if (!current_user_can('administrator') && !current_user_can('wc_product_vendors_admin_vendor') && !current_user_can('wc_product_vendors_manager_vendor'))  {
             echo "<p class='error'>You do not have permission to view this page</p>";
             return;
         }
@@ -136,7 +136,7 @@ class WVBM {
             }
             $action_strings = array();
             foreach ($actions as $action) {
-                $action_url = add_query_arg(array('wvbm_action' => $action, 'booking_id' => $booking->ID, 'security' => wp_create_nonce('vendor-booking-confirm-noncerator')), site_url() . "/vendors-dashboard/" . get_query_var('vendors-dashboard') . "/");
+                $action_url = add_query_arg(array('wvbd_action' => $action, 'booking_id' => $booking->ID, 'security' => wp_create_nonce('vendor-booking-confirm-noncerator')), site_url() . "/vendors-dashboard/" . get_query_var('vendors-dashboard') . "/");
                 $action_strings[] = ($action == "cancel") ? "<a href='" . $_booking->get_cancel_url() . "'>Cancel</a>" : "<a href='" . $action_url . "'>" . ucfirst($action) . "</a>";
             }
             $data[$booking->ID] = array(

@@ -25,3 +25,4 @@ e.g.
 
 == Changelog ==
 v1.0.1 fixes readme
+v1.0.2 changes shop_vendor taxonomy to correct name of wcpv_product_vendors and also checks for vendor management permission to allow page view.
