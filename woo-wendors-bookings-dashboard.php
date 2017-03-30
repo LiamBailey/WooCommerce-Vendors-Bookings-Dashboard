@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Woo Vendors Bookings Management
  * Description: Allows vendors to manage their bookings in the frontend
- * Version: 1.0.2
+ * Version: 2.0.0
  * Author: Liam Bailey
  * Author URI: http://webbyscots.com/
  * License: GNU General Public License v3.0
@@ -101,30 +101,51 @@ class WVBD {
 
     function show_dashboard() {
         $vendor = get_term_by('slug', get_query_var('vendors-dashboard'), 'wcpv_product_vendors');
+        $vendor_data = get_term_meta($term->term_id,'vendor_data', true);
+        if ( ! empty( $vendor_data['admins'] ) ) {
+            if ( version_compare( WC_VERSION, '2.7.0', '>=' ) && is_array( $vendor_data['admins'] ) ) {
+                $admin_ids = array_map( 'absint', $vendor_data['admins'] );
+            } else {
+                if ( is_array( $vendor_data['admins'] ) ) {
+                    $admin_ids = array_filter( array_map( 'absint', $vendor_data['admins'] ) );
+                } else {
+                    $admin_ids = array_filter( array_map( 'absint', explode( ',', $vendor_data['admins'] ) ) );
+                }
+            }
+        }
         if (!$vendor) {
             echo "<p class='error'>Vendor not found!</p>";
             return;
         }
         $user = get_current_user_id();
-        if (!current_user_can('administrator') && !current_user_can('wc_product_vendors_admin_vendor') && !current_user_can('wc_product_vendors_manager_vendor'))  {
+        if (!in_array($user->ID,$admin_ids) && !current_user_can('administrator'))  {
             echo "<p class='error'>You do not have permission to view this page</p>";
             return;
         }
-
+        $this->active_vendor = $vendor->term_id;
         $cols = array('Booking ID', 'Parent Order', 'Date', 'Start Time', 'End Time', '# of Guests', 'Price', 'User', 'Date Applied', 'Status', 'Actions');
         $tabs = array('bookings');
         $posts_per_page = 10;
         $page = (get_query_var('paged')) ? 1 : get_query_var('paged');
-        $bookings = new WP_Query(array(
-            'post_type' => 'wc_booking',
-            'posts_per_page' => $posts_per_page,
-            'meta_key' => '_booking_vendor',
-            'meta_value' => $vendor->term_id,
-            'post_status' => 'any',
-            'paged' => get_query_var('paged')
-        ));
+        if ( false === ( $bookings = get_transient( 'wcpv_reports_bookings_wg_' . $this->active_vendor ) ) ) {
+            $args = array(
+                'post_type' => 'wc_booking',
+                'posts_per_page' => $posts_per_page,
+                'post_status' => 'any',
+                'paged' => get_query_var('paged')
+            );
+
+            $bookings = get_posts( apply_filters( 'wcpv_bookings_list_widget_args', $args ) );
+
+            if ( ! empty( $bookings ) ) {
+                // filter out only bookings with products of the vendor
+                $bookings = array_filter( $bookings, array( $this, 'filter_booking_products' ) );
+            }
+
+            set_transient( 'wcpv_reports_bookings_wg_' . $this->active_vendor, $bookings, DAY_IN_SECONDS );
+        }
         $data = array();
-        foreach ($bookings->posts as $key => $booking) {
+        foreach ($bookings as $key => $booking) {
             $_booking = new WC_Booking($booking->ID);
             $user = get_post_meta($booking->ID, '_booking_customer_id', true);
             $actions = array();
@@ -195,5 +216,16 @@ class WVBD {
         ?>
         </div><?php
     }
+
+    //HELPERS
+    public function filter_booking_products( $item ) {
+		$product_ids = WC_Product_Vendors_Utils::get_vendor_product_ids($this->active_vendor);
+
+		$booking_item = get_wc_booking( $item->ID );
+
+		if ( is_object( $booking_item ) && is_object( $booking_item->get_product() ) && $booking_item->get_product()->id && in_array( $booking_item->get_product()->id, $product_ids ) ) {
+			return $item;
+		}
+	}
 
 }
