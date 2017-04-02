@@ -31,3 +31,6 @@ Sets up front end management for vendors from the WooThemes WooCommerce Vendors 
 Big changes to work with current vendors plugin, permissions changed and now checking for admins.
 
 ** Note I can't see why this would break backwards compatibility except with very old wcv vendors versions. Please contact me via [Webby Scots Website](https://webbyscots.com/) if you need help.
+
+= 2.0.1 =
+* Fix - vendors, vendor admins and vendor managers can now view the vendor dashboard of (their own if they are the vendor) any vendor they are admin/manager for.
