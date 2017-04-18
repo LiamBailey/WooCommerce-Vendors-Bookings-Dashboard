@@ -35,3 +35,6 @@ Big changes to work with current vendors plugin, permissions changed and now che
 
 = 2.0.1 =
 * Fix - vendors, vendor admins and vendor managers can now view the vendor dashboard of (their own if they are the vendor) any vendor they are admin/manager for.
+
+= 2.1.0 =
+* Fix missing entries in the dashboard
