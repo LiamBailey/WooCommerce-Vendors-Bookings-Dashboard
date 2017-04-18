@@ -122,7 +122,7 @@ class WVBD {
             echo "<p class='error'>You do not have permission to view this page</p>";
             return;
         }
-        $this->active_vendor = WC_Product_Vendors_Utils::get_logged_in_vendor();
+        $this->active_vendor = $vendor->term_id;
         $cols = array('Booking ID', 'Parent Order', 'Date', 'Start Time', 'End Time', '# of Guests', 'Price', 'User', 'Date Applied', 'Status', 'Actions');
         $tabs = array('bookings');
         $posts_per_page = 10;
@@ -136,12 +136,10 @@ class WVBD {
             );
 
             $bookings = get_posts( apply_filters( 'wcpv_bookings_list_widget_args', $args ) );
-
             if ( ! empty( $bookings ) ) {
                 // filter out only bookings with products of the vendor
                 $bookings = array_filter( $bookings, array( $this, 'filter_booking_products' ) );
             }
-
             set_transient( 'wcpv_reports_bookings_wg_' . $this->active_vendor, $bookings, DAY_IN_SECONDS );
         }
         else {
@@ -161,7 +159,7 @@ class WVBD {
             $action_strings = array();
             foreach ($actions as $action) {
                 $action_url = add_query_arg(array('wvbd_action' => $action, 'booking_id' => $booking->ID, 'security' => wp_create_nonce('vendor-booking-confirm-noncerator')), site_url() . "/vendors-dashboard/" . get_query_var('vendors-dashboard') . "/");
-                $action_strings[] = ($action == "cancel") ? "<a href='" . $_booking->get_cancel_url() . "'>Cancel</a>" : "<a href='" . $action_url . "'>" . ucfirst($action) . "</a>";
+                $action_strings[] = ($action == "cancel") ? "<a href='" . $_booking->get_cancel_url("/vendors-dashboard/{$vendor->slug}/") . "'>Cancel</a>" : "<a href='" . $action_url . "'>" . ucfirst($action) . "</a>";
             }
             $data[$booking->ID] = array(
                 'Booking ID' => $booking->ID,
