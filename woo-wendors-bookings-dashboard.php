@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Woo Vendors Bookings Management
  * Description: Allows vendors to manage their bookings in the frontend
- * Version: 2.0.1
+ * Version: 2.1.0
  * Author: Liam Bailey
  * Author URI: http://webbyscots.com/
  * License: GNU General Public License v3.0
@@ -122,7 +122,7 @@ class WVBD {
             echo "<p class='error'>You do not have permission to view this page</p>";
             return;
         }
-        $this->active_vendor = $vendor->term_id;
+        $this->active_vendor = WC_Product_Vendors_Utils::get_logged_in_vendor();
         $cols = array('Booking ID', 'Parent Order', 'Date', 'Start Time', 'End Time', '# of Guests', 'Price', 'User', 'Date Applied', 'Status', 'Actions');
         $tabs = array('bookings');
         $posts_per_page = 10;
@@ -143,6 +143,9 @@ class WVBD {
             }
 
             set_transient( 'wcpv_reports_bookings_wg_' . $this->active_vendor, $bookings, DAY_IN_SECONDS );
+        }
+        else {
+            $bookings = get_transient( 'wcpv_reports_bookings_wg_' . $this->active_vendor );
         }
         $data = array();
         foreach ($bookings as $key => $booking) {
