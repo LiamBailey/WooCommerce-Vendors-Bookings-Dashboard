@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Woo Vendors Bookings Management
  * Description: Allows vendors to manage their bookings in the frontend
- * Version: 2.1.0
+ * Version: 2.2.0
  * Author: Liam Bailey
  * Author URI: http://webbyscots.com/
  * License: GNU General Public License v3.0
@@ -140,6 +140,7 @@ class WVBD {
                 // filter out only bookings with products of the vendor
                 $bookings = array_filter( $bookings, array( $this, 'filter_booking_products' ) );
             }
+
             set_transient( 'wcpv_reports_bookings_wg_' . $this->active_vendor, $bookings, DAY_IN_SECONDS );
         }
         else {
@@ -159,7 +160,7 @@ class WVBD {
             $action_strings = array();
             foreach ($actions as $action) {
                 $action_url = add_query_arg(array('wvbd_action' => $action, 'booking_id' => $booking->ID, 'security' => wp_create_nonce('vendor-booking-confirm-noncerator')), site_url() . "/vendors-dashboard/" . get_query_var('vendors-dashboard') . "/");
-                $action_strings[] = ($action == "cancel") ? "<a href='" . $_booking->get_cancel_url("/vendors-dashboard/{$vendor->slug}/") . "'>Cancel</a>" : "<a href='" . $action_url . "'>" . ucfirst($action) . "</a>";
+                $action_strings[] = ($action == "cancel") ? "<a href='" . $_booking->get_cancel_url("/vendors-dashboard/{$vendor->slug}") . "'>Cancel</a>" : "<a href='" . $action_url . "'>" . ucfirst($action) . "</a>";
             }
             $data[$booking->ID] = array(
                 'Booking ID' => $booking->ID,
@@ -176,17 +177,18 @@ class WVBD {
             );
         }
         wc_print_notices();
-        ?><div class="woocommerce-tabs">
-            <ul class="tabs">
-        <?php
-        foreach ($tabs as $key => $tab) {
-            $class = ($key == 0) ? "active" : "";
-            ?><li class="dashboard_tab <?php echo $class; ?>">
+        ?><div class="woocommerce-tabs"><?php
+        if (count($tabs) > 1) {
+            ?><ul class="tabs"><?php
+            foreach ($tabs as $key => $tab) {
+                $class = ($key == 0) ? "active" : "";
+                ?><li class="dashboard_tab <?php echo $class; ?>">
                         <a href="#tab-<?php echo $tab; ?>"><?php echo ucwords($tab); ?></a>
-                    </li>
-        <?php } ?>
-            </ul>
-                <?php foreach ($tabs as $key => $tab) {
+                </li><?php
+            } ?>
+            </ul><?php
+        }
+        foreach ($tabs as $key => $tab) {
                     ?><div class="panel entry-content" id="tab-<?php echo $tab; ?>" style="display: block;">
                     <table class="<?php echo $tab; ?>-table">
                         <thead>
@@ -224,7 +226,7 @@ class WVBD {
 
 		$booking_item = get_wc_booking( $item->ID );
 
-		if ( is_object( $booking_item ) && is_object( $booking_item->get_product() ) && $booking_item->get_product()->id && in_array( $booking_item->get_product()->id, $product_ids ) ) {
+		if ( is_object( $booking_item ) && !strstr($booking_item->status, "in-cart") && is_object( $booking_item->get_product() ) && $booking_item->get_product()->id && in_array( $booking_item->get_product()->id, $product_ids ) ) {
 			return $item;
 		}
 	}
