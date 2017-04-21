@@ -14,6 +14,9 @@ Sets up front end management for vendors from the WooThemes WooCommerce Vendors 
 
 Sets up front end management for vendors from the WooThemes WooCommerce Vendors plugin to manage their bookings from the WooCommerce Bookings plugin.
 
+** Please note ** the base use case I have been building this plugin around dictated that the dashboard should not show the in-cart and was-in-cart statuses. If your use case
+needs these statuses I have added a filter woo_vendors_bookings_dashboard_statuses so you can add them back in.
+
 == Installation ==
 
 1. Upload the plugin files to the `/wp-content/plugins/woo-vendors-bookings-dashboard` directory, or install the plugin through the WordPress plugins screen directly.
@@ -41,3 +44,10 @@ Big changes to work with current vendors plugin, permissions changed and now che
 
 = 2.2.0 =
 * Filters out in-cart statuses from results
+* Fixes pagination
+* Removes rewrite endpoint in favour of rewrite rules so pagintion works
+* Removes display of navigation tab at the moment because only one tab is present
+
+= 3.0.0 =
+* Improvement: brings querying into main using parse_query hook - for better page title
+* Starts moving towards WooCommerce 3.0.0 and latest booking version with backwards compability included
